@@ -9,7 +9,7 @@ import java.net.URI;
 class SensorFeedClient extends WebSocketClient {
     private WebSocketEventHandler webSocketEventHandler;
 
-    public SensorFeedClient(URI serverUri, WebSocketEventHandler webSocketEventHandler) {
+    SensorFeedClient(URI serverUri, WebSocketEventHandler webSocketEventHandler) {
         super(serverUri);
         this.webSocketEventHandler = webSocketEventHandler;
     }
@@ -32,6 +32,6 @@ class SensorFeedClient extends WebSocketClient {
     @Override
     public void onError(Exception e) {
         e.printStackTrace();
-        webSocketEventHandler.exceptionRaised("Web Socket Error!");
+        webSocketEventHandler.exceptionRaised("Web Socket Error!", e);
     }
 }

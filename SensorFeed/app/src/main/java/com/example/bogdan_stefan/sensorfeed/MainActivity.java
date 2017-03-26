@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sensorFeedClient = null;
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
@@ -43,10 +45,9 @@ public class MainActivity extends AppCompatActivity
         zAxisText = (TextView) findViewById(R.id.z_axis_text);
 
         try {
-            serverAddress = new URI("ws://localhost:port");
+            serverAddress = new URI("ws://192.168.0.17:9000/ws");
         } catch (URISyntaxException e) {
-            e.printStackTrace();
-            exceptionRaised("Invalid server address!");
+            exceptionRaised("Invalid server address!", e);
         }
     }
 
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         sensorFeedClient = new SensorFeedClient(serverAddress, this);
+        sensorFeedClient.connect();
     }
 
     @Override
@@ -72,13 +74,23 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         sensorFeedClient.close();
+        sensorFeedClient = null;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        xAxisText.setText(Float.toString(event.values[0]));
-        yAxisText.setText(Float.toString(event.values[1]));
-        zAxisText.setText(Float.toString(event.values[2]));
+        String xReading = Float.toString(event.values[0]);
+        String yReading = Float.toString(event.values[1]);
+        String zReading = Float.toString(event.values[2]);
+
+        xAxisText.setText(xReading);
+        yAxisText.setText(yReading);
+        zAxisText.setText(zReading);
+
+        if (sensorFeedClient != null) {
+            String payload = Build.MODEL + "," + xReading + "," + yReading + "," + zReading;
+            sensorFeedClient.send(payload);
+        }
     }
 
     @Override
@@ -89,23 +101,35 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void connectionOpened() {
         int colorID = ResourcesCompat.getColor(getResources(), R.color.status_ok, null);
-        changeStatusCard(colorID, "Connected");
+        runOnUiThread(new StatusChanger(colorID, "Connected"));
     }
 
     @Override
     public void connectionClosed() {
         int colorID = ResourcesCompat.getColor(getResources(), R.color.status_default, null);
-        changeStatusCard(colorID, "Disconnected");
+        runOnUiThread(new StatusChanger(colorID, "Disconnected"));
     }
 
     @Override
-    public void exceptionRaised(String errorMessage) {
+    public void exceptionRaised(String errorMessage, Exception e) {
         int colorID = ResourcesCompat.getColor(getResources(), R.color.status_error, null);
-        changeStatusCard(colorID, errorMessage);
+        runOnUiThread(new StatusChanger(colorID, errorMessage));
+        e.printStackTrace();
     }
 
-    private void changeStatusCard(int colorID, String message) {
-        statusCard.setCardBackgroundColor(colorID);
-        statusText.setText(message);
+    private class StatusChanger implements Runnable {
+        private int colorID;
+        private String message;
+
+        StatusChanger(int colorID, String message) {
+            this.colorID = colorID;
+            this.message = message;
+        }
+
+        @Override
+        public void run() {
+            statusCard.setCardBackgroundColor(colorID);
+            statusText.setText(message);
+        }
     }
 }
