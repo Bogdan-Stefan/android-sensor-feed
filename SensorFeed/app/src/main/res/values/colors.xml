@@ -8,4 +8,8 @@
     <color name="status_default">#e1be00</color>
     <color name="status_ok">#14c600</color>
     <color name="status_error">#bf0000</color>
+
+    <color name="x_axis">#d50000</color>
+    <color name="y_axis">#64dd17</color>
+    <color name="z_axis">#304ffe</color>
 </resources>
