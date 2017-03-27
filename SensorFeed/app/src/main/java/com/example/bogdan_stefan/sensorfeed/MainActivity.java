@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity
         zAxisText = (TextView) findViewById(R.id.z_axis_text);
 
         try {
-            serverAddress = new URI("ws://192.168.0.17:9000/ws");
+            serverAddress = new URI("ws://your-server:9000/ws");
         } catch (URISyntaxException e) {
             exceptionRaised("Invalid server address!", e);
         }
