@@ -2,7 +2,7 @@ import cherrypy
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 from ws4py.websocket import WebSocket
 
-cherrypy.server.socket_host = '192.168.0.17'
+cherrypy.server.socket_host = 'server-ip'
 cherrypy.config.update({'server.socket_port': 9000})
 WebSocketPlugin(cherrypy.engine).subscribe()
 cherrypy.tools.websocket = WebSocketTool()
