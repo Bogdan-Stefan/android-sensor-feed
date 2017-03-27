@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity
         yAxisText.setText(yReading);
         zAxisText.setText(zReading);
 
-        if (sensorFeedClient != null) {
+        if (sensorFeedClient != null && sensorFeedClient.getReadyState() == 1) {
             String payload = Build.MODEL + "," + xReading + "," + yReading + "," + zReading;
             sensorFeedClient.send(payload);
         }
